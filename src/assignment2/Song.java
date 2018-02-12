@@ -11,6 +11,8 @@ public class Song {
 	
 	private String errorMessage = null; 
 	
+	private int closestCategory;
+	
 	public Song() {
 		
 	}
@@ -55,5 +57,13 @@ public class Song {
 	public int[] getAspect() {
 		int[] allAspects = {aspect1, aspect2, aspect3, aspect4, aspect5, aspect6};
 		return allAspects;
+	}
+	
+	public void setCategory(int category) {
+		closestCategory = category;
+	}
+	
+	public int getCategory() {
+		return closestCategory;
 	}
 }

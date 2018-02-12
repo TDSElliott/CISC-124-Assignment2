@@ -12,6 +12,7 @@ public class Category {
 	
 	private int numSongsClosest = 0;
 	private String closestSongTitle;
+	private int closestDistance = 9999999;
 	
 
 	public Category() {
@@ -58,5 +59,25 @@ public class Category {
 	
 	public void incrementNumSongs() {
 		numSongsClosest++;
+	}
+	
+	public int getNumSongs() {
+		return numSongsClosest;
+	}
+	
+	public void setClosestSongTitle(String songTitle) {
+		closestSongTitle = songTitle;
+	}
+	
+	public String getClosestSongTitle() {
+		return closestSongTitle;
+	}
+	
+	public void setClosestDistance(int distance) {
+		closestDistance = distance;
+	}
+	
+	public int getClosestDistance() {
+		return closestDistance;
 	}
 }

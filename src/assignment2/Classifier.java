@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ public class Classifier {
 	
 	
 	static BufferedReader br;
-	static BufferedWriter bw;
+//	static BufferedWriter bw;
 	
 	
 	static ArrayList<Category> categories = new ArrayList<Category>();
@@ -26,21 +27,30 @@ public class Classifier {
 		readCategories();
 		readSongs();
 		
+		checkDistance();
+		
+		saveCategoryInfo();
+		saveSongInfo();
+		
 		dumpErrors();
 		
 //		doSomeMath();
 		System.out.println("Hello world");
 //		for (int x = 0; x < categories.size(); x++ ) {
-//			System.out.println(categories.get(x).getID());
+//			System.out.println("Id is " + categories.get(x).getID());
+//			System.out.println("Number of songs #1 is " + categories.get(x).getNumSongs());
+//			System.out.println("Closest song is " + categories.get(x).getClosestSongTitle());
+//			System.out.println("It's distance is " + categories.get(x).getClosestDistance());
+//			
 //		}
 //		
 //		for (int x = 0; x < songs.size(); x++ ) {
 //			System.out.println(songs.get(x).getTitle());
 //		}
 		
-		for (int x = 0; x < errors.size(); x++ ) {
-			System.out.println(errors.get(x).getErrorInfo());
-		}
+//		for (int x = 0; x < errors.size(); x++ ) {
+//			System.out.println(errors.get(x).getErrorInfo());
+//		}
 		
 	}
 	
@@ -57,11 +67,42 @@ public class Classifier {
 	
 	public static void checkDistance() {
 		for (int x = 0; x < songs.size(); x++) {
+//			System.out.println(songs.get(x).getTitle());
+			int lowestDistance = 999999999; // use this to track which category is closest
+			int closeCategoryID = 999999999; // use to store id of closest category
 			int[] songAspects = songs.get(x).getAspect();
 			for (int y = 0; y < categories.size(); y++) {
+//				System.out.println("id " + categories.get(y).getID());
 				int[] categoryAspects = categories.get(y).getAspect();
 				
+				int distance = 0;
 				
+				for(int z = 0; z < 6; z++) {
+					distance += (songAspects[z] - categoryAspects[z]) * (songAspects[z] - categoryAspects[z]);
+				}
+				if (distance < lowestDistance) {
+//					System.out.println(distance  + " is less than or equal to " + lowestDistance);
+					closeCategoryID = categories.get(y).getID();
+					lowestDistance = distance;
+				} else if ((distance == lowestDistance) && (categories.get(y).getID() < closeCategoryID)) {
+						closeCategoryID = categories.get(y).getID();
+						lowestDistance = distance;
+				}
+				
+				if (distance < categories.get(y).getClosestDistance()) {
+					categories.get(y).setClosestDistance(distance);
+					categories.get(y).setClosestSongTitle(songs.get(x).getTitle());
+				}
+				
+//				System.out.println("distance: " + distance);
+			}
+			songs.get(x).setCategory(closeCategoryID);
+//			System.out.println("Closest category is: " + songs.get(x).getCategory());
+			
+			for (int a = 0; a < categories.size(); a++) {
+				if(categories.get(a).getID() == closeCategoryID) {
+					categories.get(a).incrementNumSongs();
+				}
 			}
 		}
 	}
@@ -112,8 +153,16 @@ public class Classifier {
 				
 				if (split.length <= 6) {
 					errors.add(new Error(line, "(not enough aspect values)"));
-				} else if (split.length >= 8) {
+				} else if (split.length > 8) {
 					errors.add(new Error(line, "(too many aspect values)"));
+				} else if (split.length == 8) {
+					try {
+						int a1 = Integer.parseInt(split[1]);
+						errors.add(new Error(line,"(too many aspect values)"));	
+					} catch (NumberFormatException e) {
+						errors.add(new Error(line,"(comma in title)"));
+					}
+					
 				} else {
 					String title = split[0];
 					try {
@@ -151,13 +200,55 @@ public class Classifier {
 	 * ***************************************/
 	public static void dumpErrors() {
 		try {
-		    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-		          new FileOutputStream("errors.txt"), "utf-8"));
-		    for (int x = 0; x < errors.size(); x++)
-		    bw.write(errors.get(x).getErrorInfo());
-		} catch (IOException ex) {
-		  // report
+			 OutputStreamWriter output = new OutputStreamWriter(
+			            new FileOutputStream("errors.txt"), "UTF-8");
+
+			    BufferedWriter buffered =
+			            new BufferedWriter(output);
+		    for (int x = 0; x < errors.size(); x++) {
+		    	buffered.write(errors.get(x).getErrorInfo());
+		    	buffered.newLine();
+		    }
+		    buffered.close();
+		} catch (Exception e) {
+			// TODO: handle exception
 		}
 	}
+	
+	public static void saveCategoryInfo() {
+		try {
+			 OutputStreamWriter output = new OutputStreamWriter(
+			            new FileOutputStream("category_stats.txt"), "UTF-8");
+
+			    BufferedWriter buffered =
+			            new BufferedWriter(output);
+		    for (int x = 0; x < categories.size(); x++) {
+		    	buffered.write(categories.get(x).getID() + "," + categories.get(x).getNumSongs() + "," + categories.get(x).getClosestSongTitle());
+		    	buffered.newLine();
+		    }
+		    buffered.close();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+	
+	public static void saveSongInfo() {
+		try {
+			 OutputStreamWriter output = new OutputStreamWriter(
+			            new FileOutputStream("song_category.txt"), "UTF-8");
+
+			    BufferedWriter buffered =
+			            new BufferedWriter(output);
+		    for (int x = 0; x < songs.size(); x++) {
+		    	buffered.write(songs.get(x).getTitle() + "," + songs.get(x).getCategory());
+		    	buffered.newLine();
+		    }
+		    buffered.close();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+	
+	
 
 }
