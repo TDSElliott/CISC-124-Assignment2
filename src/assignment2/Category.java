@@ -2,13 +2,16 @@ package assignment2;
 
 public class Category {
 	
-	int identifier = 0;
-	int aspect1 = 0;
-	int aspect2 = 0;
-	int aspect3 = 0;
-	int aspect4 = 0;
-	int aspect5 = 0;
-	int aspect6 = 0;
+	private int identifier = -2;
+	private int aspect1 = -2;
+	private int aspect2 = -2;
+	private int aspect3 = -2;
+	private int aspect4 = -2;
+	private int aspect5 = -2;
+	private int aspect6 = -2;
+	
+	private int numSongsClosest = 0;
+	private String closestSongTitle;
 	
 
 	public Category() {
@@ -46,5 +49,14 @@ public class Category {
 		} else {
 			return -1;
 		}
+	}
+	
+	public int[] getAspect() {
+		int[] allAspects = {aspect1, aspect2, aspect3, aspect4, aspect5, aspect6};
+		return allAspects;
+	}
+	
+	public void incrementNumSongs() {
+		numSongsClosest++;
 	}
 }
