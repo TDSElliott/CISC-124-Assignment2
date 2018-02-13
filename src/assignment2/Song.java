@@ -9,17 +9,10 @@ public class Song {
 	private int aspect5 = -2;
 	private int aspect6 = -2;
 	
-	private String errorMessage = null; 
-	
 	private int closestCategory;
 	
 	public Song() {
 		
-	}
-	
-	public Song(String id, String error) {
-		title = id;
-		errorMessage = error;
 	}
 	
 	public Song(String id, int a1, int a2, int a3, int a4, int a5, int a6) {
